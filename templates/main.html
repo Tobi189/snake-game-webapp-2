@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="../static/game.css">
+</head>
+<body>
+    <header>
+        <div id="scoreDisplay">Score: 0</div>
+        <div id="topRightIcons">
+            <div id="settingsIcon" title="Settings">⚙️</div>
+            <div id="userIcon" title="Profile">👤</div>
+        </div>
+    </header>
+
+    <main id="gameWrapper">
+        <div id="controls">
+            <button id="pauseBtn">Pause</button>
+            <button id="restartBtn">Restart</button>
+        </div>
+        <canvas id="gameCanvas"></canvas>
+    </main>
+
+    <section id="extras">
+        <!-- Scrollable content below canvas -->
+        <div id="rankings">
+            <h2>Global Rankings</h2>
+            <!-- Rankings will go here -->
+        </div>
+        <div id="about">
+            <h2>About the Game</h2>
+            <p>Some fun description or changelog</p>
+        </div>
+    </section>
+    
+    
+    <div id="settingsSidebar">
+        <button id="closeSidebarBtn">✖</button>
+        <h2>Settings</h2>
+    
+        <!-- Game Speed -->
+        <div class="setting-group">
+            <h3>Game Speed</h3>
+            <label><input type="radio" name="speed" value="150" checked> Fast</label><br>
+            <label><input type="radio" name="speed" value="250"> Normal</label><br>
+            <label><input type="radio" name="speed" value="350"> Slow</label>
+        </div>
+    
+        <hr>
+    
+        <!-- Grid Settings -->
+        <div class="setting-group">
+            <h3>Grid Settings</h3>
+    
+            <label for="gridSizeSelect">Grid Size</label><br>
+            <select id="gridSizeSelect">
+                <option value="10">Small (10×10)</option>
+                <option value="15">Medium (15×15)</option>
+                <option value="20" selected>Large (20×20)</option>
+            </select><br><br>
+    
+            <label>
+                <input type="checkbox" id="showGridCheckbox" checked>
+                Show Grid Lines
+            </label><br><br>
+    
+            <label for="gridColorSelect">Grid Line Color</label><br>
+            <select id="gridColorSelect">
+                <option value="white" selected>White</option>
+                <option value="green">Green</option>
+                <option value="cyan">Cyan</option>
+                <option value="gray">Gray</option>
+            </select>
+        </div>
+    
+        <hr>
+    
+        <!-- Snake Appearance -->
+        <div class="setting-group">
+            <h3>Snake Appearance</h3>
+            <label for="snakeColorSelect">Snake Color</label><br>
+            <select id="snakeColorSelect">
+                <option value="#00cc66" selected>Green</option>
+                <option value="#3399ff">Blue</option>
+                <option value="#ff3366">Red</option>
+                <option value="#9933ff">Purple</option>
+                <option value="#ff9900">Orange</option>
+            </select>
+        </div>
+    
+        <hr>
+    
+        <!-- Food Appearance -->
+        <div class="setting-group">
+            <h3>Food Appearance</h3>
+    
+            <label for="foodStyleSelect">Food Style</label><br>
+            <select id="foodStyleSelect">
+                <option value="color" selected>Color</option>
+                <option value="emoji">Emoji</option>
+            </select><br><br>
+    
+            <label for="foodColorSelect" id="foodColorLabel">Food Color</label><br>
+            <select id="foodColorSelect">
+                <option value="red" selected>Red</option>
+                <option value="yellow">Yellow</option>
+                <option value="pink">Pink</option>
+            </select><br><br>
+    
+            <label for="foodEmojiSelect" id="foodEmojiLabel" style="display: none;">Food Emoji</label><br>
+            <select id="foodEmojiSelect" style="display: none;">
+                <option value="🍎">Apple</option>
+                <option value="🍌">Banana</option>
+                <option value="🍇">Grapes</option>
+            </select>
+        </div>
+    </div>
+    
+    <div id="overlay"></div>
+    
+    <script type='module' src="../static/script.js"></script>
+</body>
+
+
+    
+</body>
+</html>

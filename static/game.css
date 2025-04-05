@@ -1,0 +1,111 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #282c34;
+    color: white;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    padding: 1rem;
+    position: sticky;
+    top: 0;
+    background-color: #1e1e1e;
+    z-index: 100;
+}
+
+#userIcon,
+#settingsIcon {
+    cursor: pointer;
+    font-size: 1.5rem;
+    transition: transform 0.2s;
+}
+
+#gameWrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 2rem auto;
+}
+
+canvas {
+    border: 2px solid white;
+    background-color: black;
+    max-width: 90vw;
+    max-height: 90vw;
+}
+
+#extras {
+    padding: 2rem;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+#settingsSidebar {
+    position: fixed;
+    top: 0;
+    right: -80vw; /* Start hidden off-screen */
+    width: 35vw;  /* Sidebar width relative to screen (80% of viewport width) */
+    max-width: 400px; /* Optional: limit on large screens */
+    height: 100vh;
+    background-color: #333;
+    color: white;
+    padding: 1rem;
+    box-shadow: -2px 0 5px rgba(0,0,0,0.5);
+    z-index: 200;
+    transition: right 0.3s ease;
+    overflow-y: auto;
+
+    /* 🧠 Add these two lines: */
+    overflow-y: auto;
+    box-sizing: border-box;
+}
+
+#settingsSidebar.active {
+    right: 0;
+}
+
+#closeSidebarBtn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    float: right;
+}
+
+#overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0,0,0,0.4);
+    z-index: 150;
+    display: none;
+}
+
+#overlay.active {
+    display: block;
+}
+
+.setting-group {
+    margin-top: 1.5rem;
+}
+
+.setting-group h3 {
+    margin-bottom: 0.5rem;
+}
+
+#settingsSidebar label {
+    display: block;
+    margin-bottom: 0.3rem;
+    cursor: pointer;
+}
+
+#settingsSidebar input[type="radio"] {
+    margin-right: 0.5rem;
+    accent-color: #00cc66;
+}
+
