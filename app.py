@@ -80,6 +80,36 @@ def logout():
     session.clear()
     return redirect(url_for('login'))
 
+@app.route('/change-password', methods=['GET', 'POST'])
+def change_password():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        current = request.form['current_password']
+        new = request.form['new_password']
+        confirm = request.form['confirm_password']
+
+        if new != confirm:
+            return render_template('change_password.html', message="New passwords do not match")
+
+        # Verify current password
+        cur.execute("SELECT password_hash FROM users WHERE id = %s", (session['user_id'],))
+        user = cur.fetchone()
+
+        if not user or not check_password_hash(user[0], current):
+            return render_template('change_password.html', message="Current password is incorrect")
+
+        # Update password
+        new_hash = generate_password_hash(new)
+        cur.execute("UPDATE users SET password_hash = %s WHERE id = %s", (new_hash, session['user_id']))
+        conn.commit()
+
+        return render_template('change_password.html', message="Password updated successfully ✅")
+
+    return render_template('change_password.html')
+
+
 # === Run ===
 if __name__ == '__main__':
     app.run(debug=True)

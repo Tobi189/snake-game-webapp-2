@@ -121,9 +121,32 @@
     <div id="userSidebar">
         <button id="closeUserSidebarBtn">✖</button>
         <h2>User Info</h2>
+    
+        <!-- Username Display -->
         <p><strong>Username:</strong> <span id="userInfoName">Guest</span></p>
+    
+        <hr>
+    
+        <!-- Preferences Summary -->
+        <div class="setting-group">
+            <h3>Current Preferences</h3>
+            <p>Snake Color: <span id="summarySnakeColor">–</span></p>
+            <p>Food Style: <span id="summaryFoodStyle">–</span></p>
+            <p>Grid Size: <span id="summaryGridSize">–</span></p>
+        </div>
+    
+        <hr>
+    
+        <!-- Account Actions -->
         <button id="logoutBtn">Logout</button>
+        <p style="margin-top: 1rem;">
+            <a href="/change-password" style="color: #4a90e2;">Change Password</a>
+        </p>
+        <button id="deleteAccountBtn" style="background-color: #cc0000; color: white; margin-top: 0.5rem; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer;">
+            Delete Account
+        </button>
     </div>
+    
     
     
     <div id="overlay"></div>
