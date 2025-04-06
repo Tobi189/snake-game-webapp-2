@@ -73,7 +73,14 @@ def signup():
 def game():
     if 'user_id' not in session:
         return redirect(url_for('login'))
-    return render_template('main.html', username=session['username'])
+
+    user_id = session['user_id']
+    username = session['username']
+
+    cur.execute("SELECT high_score FROM preferences WHERE user_id = %s", (user_id,))
+    high_score = cur.fetchone()[0]
+
+    return render_template('main.html', username=username, high_score=high_score)
 
 @app.route('/logout')
 def logout():
@@ -108,6 +115,104 @@ def change_password():
         return render_template('change_password.html', message="Password updated successfully ✅")
 
     return render_template('change_password.html')
+
+@app.route('/delete-account', methods=['POST'])
+def delete_account():
+    if 'user_id' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    data = request.get_json()
+    password = data.get('password')
+
+    if not password:
+        return jsonify({'success': False, 'message': 'Password required'}), 400
+
+    user_id = session['user_id']
+
+    # Check password before deletion
+    cur.execute("SELECT password_hash FROM users WHERE id = %s", (user_id,))
+    user = cur.fetchone()
+
+    if not user or not check_password_hash(user[0], password):
+        return jsonify({'success': False, 'message': 'Incorrect password'}), 403
+
+    # Delete user and cascade
+    cur.execute("DELETE FROM users WHERE id = %s", (user_id,))
+    conn.commit()
+
+    session.clear()
+    return jsonify({'success': True})
+
+
+from flask import jsonify
+from datetime import datetime
+
+@app.route('/submit-score', methods=['POST'])
+def submit_score():
+    if 'user_id' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    data = request.get_json()
+    score = data.get('score')
+    user_id = session['user_id']
+
+    # If score is not valid or is just for loading leaderboard (e.g. score = 0)
+    if not isinstance(score, int) or score <= 0:
+        # Just return the leaderboard
+        cur.execute("""
+            SELECT u.username, s.score
+            FROM scores s
+            JOIN users u ON s.user_id = u.id
+            ORDER BY s.score DESC
+            LIMIT 5
+        """)
+        top_scores = cur.fetchall()
+        leaderboard = [{'username': row[0], 'score': row[1]} for row in top_scores]
+
+        # Return current high_score as well
+        cur.execute("SELECT high_score FROM preferences WHERE user_id = %s", (user_id,))
+        high_score = cur.fetchone()[0]
+
+        return jsonify({
+            'high_score': high_score,
+            'leaderboard': leaderboard
+        })
+
+    # If this is a real game score
+    from datetime import datetime
+    cur.execute("""
+        INSERT INTO scores (user_id, score, played_at)
+        VALUES (%s, %s, %s)
+    """, (user_id, score, datetime.now()))
+    conn.commit()
+
+    # Update high score if needed
+    cur.execute("SELECT high_score FROM preferences WHERE user_id = %s", (user_id,))
+    current_high = cur.fetchone()[0]
+
+    if score > current_high:
+        cur.execute("UPDATE preferences SET high_score = %s WHERE user_id = %s", (score, user_id))
+        conn.commit()
+        current_high = score
+    else:
+        current_high = current_high
+
+    # Return updated leaderboard
+    cur.execute("""
+        SELECT u.username, s.score
+        FROM scores s
+        JOIN users u ON s.user_id = u.id
+        ORDER BY s.score DESC
+        LIMIT 5
+    """)
+    top_scores = cur.fetchall()
+    leaderboard = [{'username': row[0], 'score': row[1]} for row in top_scores]
+
+    return jsonify({
+        'high_score': current_high,
+        'leaderboard': leaderboard
+    })
+
 
 
 # === Run ===

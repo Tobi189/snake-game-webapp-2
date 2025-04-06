@@ -6,9 +6,11 @@
     <title>Document</title>
     <link rel="stylesheet" href="../static/game.css">
 </head>
-<body data-username="{{ username }}">
+<body data-username="{{ username }}" data-best="{{ high_score }}">
     <header>
         <div id="scoreDisplay">Score: 0</div>
+        <div id="bestScoreDisplay">Best: 0</div>
+
         <div id="topRightIcons">
             <div id="settingsIcon" title="Settings">⚙️</div>
             <div id="userIcon" title="Profile">👤</div>
@@ -145,6 +147,8 @@
         <button id="deleteAccountBtn" style="background-color: #cc0000; color: white; margin-top: 0.5rem; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer;">
             Delete Account
         </button>
+        <input type="password" id="deletePassword" placeholder="Confirm password" style="margin-top: 1rem; width: 100%; padding: 0.5rem; border-radius: 6px; border: 1px solid #ccc;" />
+
     </div>
     
     

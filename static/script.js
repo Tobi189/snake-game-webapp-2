@@ -14,10 +14,20 @@ import { userSidebar } from './user.js';
 settingsSidebar();
 userSidebar();
 
+const bestScoreDisplay = document.getElementById("bestScoreDisplay");
+const best = document.body.dataset.best;
+
+if (bestScoreDisplay && best) {
+    bestScoreDisplay.textContent = `Best: ${best}`;
+}
+
+
 
 // === Game Settings ===
 let speed = 150;
 let gameLoopInterval = null;
+let scoreSubmitted = false;
+
 
 function startGameLoop() {
     if (gameLoopInterval) clearInterval(gameLoopInterval);
@@ -117,6 +127,7 @@ function drawGameOverMessage() {
 
     ctx.font = `${cellSize * 0.6}px Arial`;
     ctx.fillText(`Score: ${score}`, centerX, centerY + cellSize * 0.1);
+    
 }
 
 function drawStartMessage() {
@@ -146,6 +157,11 @@ function gameLoop() {
     if (gameOver) {
         drawGameOverMessage();
         drawRestartButton();
+        
+    if (!scoreSubmitted) {
+        submitScore(score); // Only submit once
+        scoreSubmitted = true;
+    }
         return;
     }
 
@@ -193,6 +209,7 @@ function startCountdown() {
 
 // === Restart ===
 function restartGame() {
+    scoreSubmitted = false; // Reset for next round
     score = 0;
     scoreDisplay.textContent = `Score: 0`;
 
@@ -305,6 +322,66 @@ canvas.addEventListener("click", (event) => {
     }
 });
 
+function submitScore(score) {
+    fetch("/submit-score", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ score })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.high_score !== undefined) {
+            document.getElementById("bestScoreDisplay").textContent = `Best: ${data.high_score}`;
+        }
+
+        if (data.leaderboard) {
+            const rankingsDiv = document.getElementById("rankings");
+            rankingsDiv.innerHTML = "<h2>Global Rankings</h2>";
+
+            data.leaderboard.forEach((entry, index) => {
+                const row = document.createElement("p");
+                row.textContent = `${index + 1}. ${entry.username} - ${entry.score}`;
+                rankingsDiv.appendChild(row);
+            });
+        }
+    })
+    .catch(err => {
+        console.error("Score submission failed:", err);
+    });
+}
+
+loadLeaderboard();
+
+function loadLeaderboard() {
+    fetch("/submit-score", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ score: 0 }) // fake score for loading only
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.high_score) {
+            const bestScoreDisplay = document.getElementById("bestScoreDisplay");
+            bestScoreDisplay.textContent = `Best: ${data.high_score}`;
+        }
+
+        if (data.leaderboard) {
+            const rankingsDiv = document.getElementById("rankings");
+            rankingsDiv.innerHTML = "<h2>Global Rankings</h2>";
+            data.leaderboard.forEach((entry, i) => {
+                const p = document.createElement("p");
+                p.textContent = `${i + 1}. ${entry.username} - ${entry.score}`;
+                rankingsDiv.appendChild(p);
+            });
+        }
+    });
+}
+
+
+
+
 document.getElementById("pauseBtn").addEventListener("click", togglePause);
 document.getElementById("restartBtn").addEventListener("click", restartGame);
 
@@ -313,6 +390,7 @@ document.getElementById("restartBtn").addEventListener("click", restartGame);
 window.addEventListener("load", () => {
     resizeCanvas();
     generateFood();
+    loadLeaderboard(); // 👈 auto-load top 5
 });
 
 window.addEventListener("resize", resizeCanvas);

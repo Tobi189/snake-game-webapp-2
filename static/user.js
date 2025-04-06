@@ -44,6 +44,40 @@ function userSidebar() {
     logoutBtn.addEventListener("click", () => {
         window.location.href = "/logout";
     });
+
+    deleteAccountBtn.addEventListener("click", () => {
+        const password = document.getElementById("deletePassword").value.trim();
+    
+        if (!password) {
+            alert("Please enter your password to confirm.");
+            return;
+        }
+    
+        const confirmDelete = confirm("Are you absolutely sure? This cannot be undone.");
+    
+        if (confirmDelete) {
+            fetch("/delete-account", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ password })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    alert("Account deleted successfully.");
+                    window.location.href = "/signup";
+                } else {
+                    alert(data.message || "Error deleting account.");
+                }
+            })
+            .catch(err => {
+                console.error("Account deletion failed:", err);
+            });
+        }
+    });
+    
 }
 
 export { userSidebar };
