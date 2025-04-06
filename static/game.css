@@ -109,3 +109,43 @@ canvas {
     accent-color: #00cc66;
 }
 
+#userSidebar {
+    position: fixed;
+    top: 0;
+    right: -35vw;
+    width: 35vw;
+    max-width: 400px;
+    height: 100vh;
+    background-color: #333;
+    color: white;
+    padding: 1rem;
+    box-shadow: -2px 0 5px rgba(0,0,0,0.5);
+    z-index: 201;
+    transition: right 0.3s ease;
+    overflow-y: auto;
+    box-sizing: border-box;
+}
+
+#userSidebar.active {
+    right: 0;
+}
+
+#closeUserSidebarBtn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    float: right;
+}
+
+#logoutBtn {
+    background-color: #ff4444;
+    border: none;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 1rem;
+}
+

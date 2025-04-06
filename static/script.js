@@ -8,10 +8,12 @@ import {
 } from './grid.js';
 
 import { drawFood, generateFood } from './food.js';
-
 import { settingsSidebar } from './settings.js';
+import { userSidebar } from './user.js';
 
 settingsSidebar();
+userSidebar();
+
 
 // === Game Settings ===
 let speed = 150;

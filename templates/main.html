@@ -6,7 +6,7 @@
     <title>Document</title>
     <link rel="stylesheet" href="../static/game.css">
 </head>
-<body>
+<body data-username="{{ username }}">
     <header>
         <div id="scoreDisplay">Score: 0</div>
         <div id="topRightIcons">
@@ -117,6 +117,14 @@
             </select>
         </div>
     </div>
+
+    <div id="userSidebar">
+        <button id="closeUserSidebarBtn">✖</button>
+        <h2>User Info</h2>
+        <p><strong>Username:</strong> <span id="userInfoName">Guest</span></p>
+        <button id="logoutBtn">Logout</button>
+    </div>
+    
     
     <div id="overlay"></div>
     
