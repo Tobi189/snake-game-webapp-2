@@ -358,26 +358,30 @@ function loadLeaderboard() {
     fetch("/submit-score", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ score: 0 }) // fake score for loading only
+        body: JSON.stringify({ score: 0 })  // fake score just to fetch leaderboard
     })
     .then(res => res.json())
     .then(data => {
-        if (data.high_score) {
-            const bestScoreDisplay = document.getElementById("bestScoreDisplay");
-            bestScoreDisplay.textContent = `Best: ${data.high_score}`;
-        }
+        const rankingsDiv = document.getElementById("rankings");
+        rankingsDiv.innerHTML = "<h2>Global Rankings</h2>";
 
-        if (data.leaderboard) {
-            const rankingsDiv = document.getElementById("rankings");
-            rankingsDiv.innerHTML = "<h2>Global Rankings</h2>";
+        if (data.leaderboard && data.leaderboard.length > 0) {
             data.leaderboard.forEach((entry, i) => {
                 const p = document.createElement("p");
                 p.textContent = `${i + 1}. ${entry.username} - ${entry.score}`;
                 rankingsDiv.appendChild(p);
             });
+        } else {
+            const p = document.createElement("p");
+            p.textContent = "No scores yet.";
+            rankingsDiv.appendChild(p);
         }
+    })
+    .catch(err => {
+        console.error("Failed to load leaderboard:", err);
     });
 }
+
 
 
 

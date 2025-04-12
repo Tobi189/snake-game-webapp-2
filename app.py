@@ -1,7 +1,6 @@
 from flask import Flask, render_template, request, redirect, session, url_for
 from werkzeug.security import generate_password_hash, check_password_hash
 import psycopg2
-import os
 
 app = Flask(__name__)
 app.secret_key = 'dev_secret_key'  # Change this to something secure
@@ -61,9 +60,7 @@ def signup():
         user_id = cur.fetchone()[0]
         conn.commit()
 
-        # Create default preferences
-        cur.execute("INSERT INTO preferences (user_id) VALUES (%s)", (user_id,))
-        conn.commit()
+   
 
         return redirect(url_for('login'))
 
@@ -77,8 +74,8 @@ def game():
     user_id = session['user_id']
     username = session['username']
 
-    cur.execute("SELECT high_score FROM preferences WHERE user_id = %s", (user_id,))
-    high_score = cur.fetchone()[0]
+    cur.execute("SELECT MAX(score) FROM scores WHERE user_id = %s", (user_id,))
+    high_score = cur.fetchone()[0] or 0
 
     return render_template('main.html', username=username, high_score=high_score)
 
@@ -170,13 +167,15 @@ def submit_score():
         leaderboard = [{'username': row[0], 'score': row[1]} for row in top_scores]
 
         # Return current high_score as well
-        cur.execute("SELECT high_score FROM preferences WHERE user_id = %s", (user_id,))
-        high_score = cur.fetchone()[0]
+        cur.execute("SELECT MAX(score) FROM scores WHERE user_id = %s", (user_id,))
+        high_score = cur.fetchone()[0] or 0
+
 
         return jsonify({
             'high_score': high_score,
             'leaderboard': leaderboard
         })
+
 
     # If this is a real game score
     from datetime import datetime
