@@ -24,7 +24,7 @@ if (bestScoreDisplay && best) {
 
 
 // === Game Settings ===
-let speed = 150;
+export let speed = 150;
 let gameLoopInterval = null;
 let scoreSubmitted = false;
 
@@ -211,6 +211,7 @@ function startCountdown() {
 function restartGame() {
     scoreSubmitted = false; // Reset for next round
     score = 0;
+    
     scoreDisplay.textContent = `Score: 0`;
 
     gameOver = false;

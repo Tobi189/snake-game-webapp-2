@@ -1,5 +1,5 @@
 import {cellSize,ctx,gridSize} from './grid.js';
-import {gameOver, score, setScore, setGameOver} from './script.js';
+import {gameOver, score, setScore, setGameOver, speed} from './script.js';
 import {food, generateFood} from './food.js';
 
 let snakeColor = "#00cc66"; // default green
@@ -84,7 +84,13 @@ function moveSnake() {
 
     // Eat food or move
     if (head.x === food.x && head.y === food.y) {
-        setScore(score + 10);
+        if(speed == 150){
+            setScore(score + 10);
+        }else if(speed == 250){
+            setScore(score + 8);
+        }else{
+            setScore(score + 7);
+        }
         scoreDisplay.textContent = `Score: ${score}`;
         generateFood();
     } else {
