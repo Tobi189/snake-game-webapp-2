@@ -186,15 +186,8 @@ def submit_score():
     conn.commit()
 
     # Update high score if needed
-    cur.execute("SELECT high_score FROM preferences WHERE user_id = %s", (user_id,))
-    current_high = cur.fetchone()[0]
-
-    if score > current_high:
-        cur.execute("UPDATE preferences SET high_score = %s WHERE user_id = %s", (score, user_id))
-        conn.commit()
-        current_high = score
-    else:
-        current_high = current_high
+    cur.execute("SELECT MAX(score) FROM scores WHERE user_id = %s", (user_id,))
+    current_high = cur.fetchone()[0] or 0
 
     # Return updated leaderboard
     cur.execute("""
