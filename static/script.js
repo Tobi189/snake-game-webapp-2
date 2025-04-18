@@ -246,9 +246,14 @@ function togglePause() {
     }
 }
 
-
-// === Input Handling ===
+// input handling
 document.addEventListener("keydown", (event) => {
+    const activeElement = document.activeElement;
+    const isTyping = activeElement.tagName === "INPUT" || activeElement.tagName === "TEXTAREA";
+
+    // Ignore keys if typing in input field
+    if (isTyping) return;
+
     const validKeys = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "w", "a", "s", "d"];
     if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " "].includes(event.key)) {
         event.preventDefault();
@@ -286,6 +291,7 @@ document.addEventListener("keydown", (event) => {
         }
     }
 });
+
 
 document.addEventListener("keydown", (e) => {
     if (["Escape", " "].includes(e.key)) {
