@@ -11,37 +11,37 @@ import { drawFood, generateFood } from './food.js';
 import { settingsSidebar } from './settings.js';
 import { userSidebar } from './user.js';
 
+// === Sidebar Initialization ===
 settingsSidebar();
 userSidebar();
 
+// === Score Display ===
 const bestScoreDisplay = document.getElementById("bestScoreDisplay");
+const scoreDisplay = document.getElementById("scoreDisplay");
 const best = document.body.dataset.best;
 
 if (bestScoreDisplay && best) {
     bestScoreDisplay.textContent = `Best: ${best}`;
 }
 
-
-
-// === Game Settings ===
+// === Game State ===
 export let speed = 150;
-let gameLoopInterval = null;
-let scoreSubmitted = false;
-
-
-function startGameLoop() {
-    if (gameLoopInterval) clearInterval(gameLoopInterval);
-    gameLoopInterval = setInterval(gameLoop, speed);
-}
-
 export let gameOver = false;
 export let score = 0;
 
+let gameLoopInterval = null;
 let gameStarted = false;
 let isPaused = false;
 let countdown = 0;
 let countdownInterval;
+let scoreSubmitted = false;
 
+// === Button Dimensions ===
+const restartButton = { x: 0, y: 0, width: 150, height: 50 };
+const resumeButton = { x: 0, y: 0, width: 150, height: 50 };
+const pauseRestartButton = { x: 0, y: 0, width: 150, height: 50 };
+
+// === Game State Setters ===
 export function setGameOver(value) {
     gameOver = value;
 }
@@ -50,16 +50,7 @@ export function setScore(value) {
     score = value;
 }
 
-const scoreDisplay = document.getElementById("scoreDisplay");
-
-
-// === Buttons ===
-const restartButton = { x: 0, y: 0, width: 150, height: 50 };
-const resumeButton = { x: 0, y: 0, width: 150, height: 50 };
-const pauseRestartButton = { x: 0, y: 0, width: 150, height: 50 };
-
-
-// === Canvas Resizing ===
+// === Game Initialization ===
 function resizeCanvas() {
     const size = Math.min(window.innerWidth, window.innerHeight) * 0.65;
     canvas.width = size;
@@ -70,8 +61,113 @@ function resizeCanvas() {
     drawSnake();
 }
 
+function startGameLoop() {
+    if (gameLoopInterval) clearInterval(gameLoopInterval);
+    gameLoopInterval = setInterval(gameLoop, speed);
+}
 
-// === UI Drawing Functions ===
+// === Main Game Loop ===
+function gameLoop() {
+    if (countdown > 0) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    } else {
+        ctx.fillStyle = "rgba(0, 0, 0, 0.65)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    drawGrid();
+    drawSnake();
+    drawFood();
+
+    if (gameOver) {
+        drawGameOverMessage();
+        drawRestartButton();
+
+        if (!scoreSubmitted) {
+            submitScore(score);
+            scoreSubmitted = true;
+        }
+        return;
+    }
+
+    if (isPaused) {
+        drawPauseMenu();
+        return;
+    }
+
+    if (countdown > 0) {
+        ctx.fillStyle = "white";
+        ctx.font = `${cellSize * 1.5}px Arial`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(countdown, canvas.width / 2, canvas.height / 2);
+        return;
+    }
+
+    if (gameStarted) {
+        moveSnake();
+    } else {
+        drawStartMessage();
+    }
+}
+
+// === Countdown ===
+function startCountdown() {
+    clearInterval(countdownInterval);
+
+    let count = 3;
+    countdown = count;
+    isPaused = false;
+
+    countdownInterval = setInterval(() => {
+        count--;
+        countdown = count;
+
+        if (count < 0) {
+            clearInterval(countdownInterval);
+            countdown = 0;
+        }
+    }, 1000);
+}
+
+// === Game Control ===
+function restartGame() {
+    scoreSubmitted = false;
+    score = 0;
+    scoreDisplay.textContent = `Score: 0`;
+
+    gameOver = false;
+    gameStarted = false;
+    isPaused = false;
+    countdown = 0;
+
+    clearInterval(countdownInterval);
+
+    setDirection("RIGHT");
+    setDirectionQueue([]);
+    setSnake([
+        { x: 5, y: 5 },
+        { x: 4, y: 5 },
+        { x: 3, y: 5 }
+    ]);
+
+    generateFood();
+}
+
+function togglePause() {
+    if (gameOver || !gameStarted) return;
+
+    isPaused = !isPaused;
+
+    if (isPaused) {
+        setDirectionQueue([]);
+        drawPauseMenu();
+    } else {
+        startCountdown();
+    }
+}
+
+// === UI Drawing ===
 function drawRestartButton() {
     const { width, height } = restartButton;
     restartButton.x = (canvas.width - width) / 2;
@@ -99,6 +195,29 @@ function drawPauseMenu() {
     drawButton(pauseRestartButton, "Restart");
 }
 
+function drawGameOverMessage() {
+    ctx.fillStyle = "white";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+
+    ctx.font = `${cellSize}px Arial`;
+    ctx.fillText("Game Over", centerX, centerY - cellSize * 0.8);
+
+    ctx.font = `${cellSize * 0.6}px Arial`;
+    ctx.fillText(`Score: ${score}`, centerX, centerY + cellSize * 0.1);
+}
+
+function drawStartMessage() {
+    ctx.fillStyle = "white";
+    ctx.font = `${cellSize * 0.8}px Arial`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("Press arrow or WASD key to start", canvas.width / 2, canvas.height / 2);
+}
+
 function drawButton(button, text) {
     ctx.fillStyle = "#333";
     ctx.fillRect(button.x, button.y, button.width, button.height);
@@ -114,149 +233,14 @@ function drawButton(button, text) {
     ctx.fillText(text, button.x + button.width / 2, button.y + button.height / 2);
 }
 
-function drawGameOverMessage() {
-    ctx.fillStyle = "white";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-
-    const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2;
-
-    ctx.font = `${cellSize}px Arial`;
-    ctx.fillText("Game Over", centerX, centerY - cellSize * 0.8);
-
-    ctx.font = `${cellSize * 0.6}px Arial`;
-    ctx.fillText(`Score: ${score}`, centerX, centerY + cellSize * 0.1);
-    
-}
-
-function drawStartMessage() {
-    ctx.fillStyle = "white";
-    ctx.font = `${cellSize * 0.8}px Arial`;
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText("Press arrow or WASD key to start", canvas.width / 2, canvas.height / 2);
-}
-
-
-// === Game Logic ===
-function gameLoop() {
-    if (countdown > 0) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height); // crisp for countdown
-    } else {
-        ctx.fillStyle = "rgba(0, 0, 0, 0.65)"; // ghosting for everything else
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-    }
-    
-    drawGrid();
-    drawSnake();
-    drawFood();
-
-    
-
-    if (gameOver) {
-        drawGameOverMessage();
-        drawRestartButton();
-        
-    if (!scoreSubmitted) {
-        submitScore(score); // Only submit once
-        scoreSubmitted = true;
-    }
-        return;
-    }
-
-    if (isPaused) {
-        drawPauseMenu();
-        return;
-    }
-
-    if (countdown > 0) {
-        ctx.fillStyle = "white";
-        ctx.font = `${cellSize * 1.5}px Arial`;
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText(countdown, canvas.width / 2, canvas.height / 2);
-        return;
-    }
-
-    if (gameStarted) {
-        moveSnake();
-    } else {
-        drawStartMessage();
-    }
-}
-
-
-// === Countdown ===
-function startCountdown() {
-    clearInterval(countdownInterval);
-
-    let count = 3;
-    countdown = count;
-    isPaused = false;
-
-    countdownInterval = setInterval(() => {
-        count--;
-        countdown = count;
-
-        if (count < 0) {
-            clearInterval(countdownInterval);
-            countdown = 0;
-        }
-    }, 1000);
-}
-
-
-// === Restart ===
-function restartGame() {
-    scoreSubmitted = false; // Reset for next round
-    score = 0;
-    
-    scoreDisplay.textContent = `Score: 0`;
-
-    gameOver = false;
-    gameStarted = false;
-    isPaused = false;
-    countdown = 0;
-
-    clearInterval(countdownInterval);
-
-    setDirection("RIGHT");
-    setDirectionQueue([]);
-    setSnake([
-        { x: 5, y: 5 },
-        { x: 4, y: 5 },
-        { x: 3, y: 5 }
-    ]);
-
-    generateFood();
-}
-
-
-// === Pause ===
-function togglePause() {
-    if (gameOver || !gameStarted) return;
-
-    isPaused = !isPaused;
-
-    if (isPaused) {
-        setDirectionQueue([]);
-        drawPauseMenu();
-    } else {
-        startCountdown();
-    }
-}
-
-// input handling
+// === Input Handling ===
 document.addEventListener("keydown", (event) => {
     const activeElement = document.activeElement;
     const isTyping = activeElement.tagName === "INPUT" || activeElement.tagName === "TEXTAREA";
-
-    // Ignore keys if typing in input field
     if (isTyping) return;
 
     const validKeys = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "w", "a", "s", "d"];
-    if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " "].includes(event.key)) {
+    if (validKeys.includes(event.key) || event.key === " ") {
         event.preventDefault();
     }
 
@@ -276,11 +260,7 @@ document.addEventListener("keydown", (event) => {
         ? directionQueue[directionQueue.length - 1]
         : direction;
 
-    const opposites = {
-        UP: "DOWN", DOWN: "UP",
-        LEFT: "RIGHT", RIGHT: "LEFT"
-    };
-
+    const opposites = { UP: "DOWN", DOWN: "UP", LEFT: "RIGHT", RIGHT: "LEFT" };
     const isReversing = newDirection === opposites[lastDir];
     const isRedundant = newDirection === lastDir;
 
@@ -292,7 +272,6 @@ document.addEventListener("keydown", (event) => {
         }
     }
 });
-
 
 document.addEventListener("keydown", (e) => {
     if (["Escape", " "].includes(e.key)) {
@@ -329,18 +308,17 @@ canvas.addEventListener("click", (event) => {
     }
 });
 
+// === Score & Leaderboard ===
 function submitScore(score) {
     fetch("/submit-score", {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ score })
     })
     .then(response => response.json())
     .then(data => {
         if (data.high_score !== undefined) {
-            document.getElementById("bestScoreDisplay").textContent = `Best: ${data.high_score}`;
+            bestScoreDisplay.textContent = `Best: ${data.high_score}`;
         }
 
         if (data.leaderboard) {
@@ -359,13 +337,11 @@ function submitScore(score) {
     });
 }
 
-loadLeaderboard();
-
 function loadLeaderboard() {
     fetch("/submit-score", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ score: 0 })  // fake score just to fetch leaderboard
+        body: JSON.stringify({ score: 0 })
     })
     .then(res => res.json())
     .then(data => {
@@ -389,26 +365,22 @@ function loadLeaderboard() {
     });
 }
 
-
-
-
-
+// === UI Buttons ===
 document.getElementById("pauseBtn").addEventListener("click", togglePause);
 document.getElementById("restartBtn").addEventListener("click", restartGame);
-
 
 // === Initialization ===
 window.addEventListener("load", () => {
     resizeCanvas();
     generateFood();
-    loadLeaderboard(); // 👈 auto-load top 5
+    loadLeaderboard();
 });
 
 window.addEventListener("resize", resizeCanvas);
 startGameLoop();
 
+// === Exported API ===
 export function updateGameSpeed(newSpeed) {
     speed = newSpeed;
     startGameLoop();
 }
-

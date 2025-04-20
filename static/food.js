@@ -1,25 +1,17 @@
-import {gridSize, cellSize, ctx} from './grid.js';
-import {snake} from './snake.js';
+import { gridSize, cellSize, ctx } from './grid.js';
+import { snake } from './snake.js';
 
 let food = { x: 10, y: 10 };
-let foodStyle = "color";  // or "emoji"
-let foodColor = "red";    // default color
-let foodEmoji = "🍎";     // default emoji
+let foodStyle = "color";
+let foodColor = "red";
+let foodEmoji = "🍎";
 
-function setFoodStyle(style) {
-    foodStyle = style;
-}
+// === Food Generation ===
 
-function setFoodColor(color) {
-    foodColor = color;
-}
-
-function setFoodEmoji(emoji) {
-    foodEmoji = emoji;
-}
-
-
-// === Food ===
+/**
+ * Randomly places food on the grid,
+ * avoiding any overlap with the snake's body.
+ */
 function generateFood() {
     let valid = false;
 
@@ -27,13 +19,16 @@ function generateFood() {
         food.x = Math.floor(Math.random() * gridSize);
         food.y = Math.floor(Math.random() * gridSize);
 
-        // Don’t place food inside the snake
         valid = !snake.some(segment => segment.x === food.x && segment.y === food.y);
     }
-
-
 }
 
+// === Food Rendering ===
+
+/**
+ * Draws the food on the canvas.
+ * Depending on the style, it's either a colored circle or an emoji.
+ */
 function drawFood() {
     const x = food.x * cellSize + cellSize / 2;
     const y = food.y * cellSize + cellSize / 2;
@@ -52,4 +47,27 @@ function drawFood() {
     }
 }
 
-export {drawFood, generateFood, food, setFoodColor, setFoodEmoji, setFoodStyle};
+// === Setters ===
+
+function setFoodStyle(style) {
+    foodStyle = style;
+}
+
+function setFoodColor(color) {
+    foodColor = color;
+}
+
+function setFoodEmoji(emoji) {
+    foodEmoji = emoji;
+}
+
+// === Exports ===
+
+export {
+    drawFood,
+    generateFood,
+    food,
+    setFoodStyle,
+    setFoodColor,
+    setFoodEmoji
+};

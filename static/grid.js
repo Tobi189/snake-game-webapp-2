@@ -6,6 +6,35 @@ let gridSize = 15;
 let showGridLines = true;
 let gridLineColor = "rgba(255, 255, 255, 0.2)";
 
+
+// === Grid Drawing ===
+function drawGrid() {
+    if (!showGridLines) return;
+
+    ctx.strokeStyle = gridLineColor;
+    ctx.lineWidth = 1;
+
+    for (let i = 0; i <= gridSize; i++) {
+        const pos = i * cellSize;
+
+        // Horizontal lines
+        ctx.beginPath();
+        ctx.moveTo(pos, 0);
+        ctx.lineTo(pos, canvas.height);
+        ctx.stroke();
+
+        // Vertical lines
+        ctx.beginPath();
+        ctx.moveTo(0, pos);
+        ctx.lineTo(canvas.width, pos);
+        ctx.stroke();
+    }
+}
+
+function setCellSize(value){
+    cellSize = value;
+}
+
 function setGridSize(value) {
     gridSize = value;
 }
@@ -27,32 +56,14 @@ function setGridLineColor(value) {
 }
 
 
-
-// === Grid Drawing ===
-function drawGrid() {
-    if (!showGridLines) return;
-
-    ctx.strokeStyle = gridLineColor;
-    ctx.lineWidth = 1;
-
-    for (let i = 0; i <= gridSize; i++) {
-        const pos = i * cellSize;
-
-        ctx.beginPath();
-        ctx.moveTo(pos, 0);
-        ctx.lineTo(pos, canvas.height);
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.moveTo(0, pos);
-        ctx.lineTo(canvas.width, pos);
-        ctx.stroke();
-    }
-}
-
-function setCellSize(value){
-    cellSize = value;
-}
-
-
-export {gridSize, cellSize, canvas, ctx, drawGrid, setCellSize, setGridSize, setShowGridLines, setGridLineColor };
+export {
+    canvas,     // canvas element reference
+    cellSize,   // size of one cell in pixels
+    ctx,        // 2D drawing context
+    drawGrid,   // function to draw grid lines
+    gridSize,   // number of cells per row/column
+    setCellSize,
+    setGridLineColor,
+    setGridSize,
+    setShowGridLines
+};

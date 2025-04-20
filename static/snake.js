@@ -1,12 +1,8 @@
-import {cellSize,ctx,gridSize} from './grid.js';
-import {gameOver, score, setScore, setGameOver, speed} from './script.js';
-import {food, generateFood} from './food.js';
+import { cellSize, ctx, gridSize } from './grid.js';
+import { gameOver, score, setScore, setGameOver, speed } from './script.js';
+import { food, generateFood } from './food.js';
 
-let snakeColor = "#00cc66"; // default green
-
-function setSnakeColor(color) {
-    snakeColor = color;
-}
+let snakeColor = "#00cc66";
 
 let snake = [
     { x: 5, y: 5 },
@@ -17,7 +13,11 @@ let snake = [
 let direction = "RIGHT";
 let directionQueue = [];
 
-// === Snake Drawing ===
+// === Snake Rendering ===
+
+/**
+ * Draws a rounded rectangle segment on the canvas.
+ */
 function drawRoundedRect(x, y, width, height, radius) {
     ctx.beginPath();
     ctx.moveTo(x + radius, y);
@@ -32,6 +32,9 @@ function drawRoundedRect(x, y, width, height, radius) {
     ctx.closePath();
 }
 
+/**
+ * Renders the snake on the canvas using rounded segments.
+ */
 function drawSnake() {
     const segmentSize = cellSize * 0.8;
     const offset = (cellSize - segmentSize) / 2;
@@ -51,7 +54,12 @@ function drawSnake() {
     }
 }
 
-// === Snake Movement ===
+// === Snake Logic ===
+
+/**
+ * Updates the snake's position, handles movement,
+ * collision detection, and food consumption.
+ */
 function moveSnake() {
     if (gameOver) return;
 
@@ -61,17 +69,15 @@ function moveSnake() {
 
     const head = { ...snake[0] };
     if (direction === "RIGHT") head.x += 1;
-    if (direction === "LEFT") head.x -= 1;
-    if (direction === "UP") head.y -= 1;
-    if (direction === "DOWN") head.y += 1;
+    if (direction === "LEFT")  head.x -= 1;
+    if (direction === "UP")    head.y -= 1;
+    if (direction === "DOWN")  head.y += 1;
 
-    // Wall collision
     if (head.x < 0 || head.x >= gridSize || head.y < 0 || head.y >= gridSize) {
         setGameOver(true);
         return;
     }
 
-    // Self collision
     for (let segment of snake) {
         if (head.x === segment.x && head.y === segment.y) {
             setGameOver(true);
@@ -79,28 +85,55 @@ function moveSnake() {
         }
     }
 
-    // Add head
     snake.unshift(head);
 
-    // Eat food or move
     if (head.x === food.x && head.y === food.y) {
-        if(speed == 150){
-            setScore(score + 10);
-        }else if(speed == 250){
-            setScore(score + 8);
-        }else{
-            setScore(score + 7);
-        }
-        scoreDisplay.textContent = `Score: ${score}`;
+        updateScore();
         generateFood();
     } else {
         snake.pop();
     }
 }
 
+/**
+ * Increases score based on speed and updates UI.
+ */
+function updateScore() {
+    if (speed === 150) setScore(score + 10);
+    else if (speed === 250) setScore(score + 8);
+    else setScore(score + 7);
 
-function setDirection(value){ direction = value};
-function setDirectionQueue(value){directionQueue = value};
-function setSnake(value){snake = value};
+    document.getElementById("scoreDisplay").textContent = `Score: ${score}`;
+}
 
-export {moveSnake, drawSnake, direction, directionQueue, snake, setDirection, setDirectionQueue, setSnake,setSnakeColor }
+// === State Setters ===
+
+function setDirection(value) {
+    direction = value;
+}
+
+function setDirectionQueue(value) {
+    directionQueue = value;
+}
+
+function setSnake(value) {
+    snake = value;
+}
+
+function setSnakeColor(color) {
+    snakeColor = color;
+}
+
+// === Exports ===
+
+export {
+    direction,
+    directionQueue,
+    snake,
+    drawSnake,
+    moveSnake,
+    setDirection,
+    setDirectionQueue,
+    setSnake,
+    setSnakeColor
+};
