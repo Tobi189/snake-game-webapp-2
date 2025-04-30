@@ -10,7 +10,7 @@ conn = psycopg2.connect(
     dbname='snakegame',
     user='postgres',
     password='nia12345',
-    host='localhost',
+    host='host.docker.internal',
     port='5432'
 )
 cur = conn.cursor()
