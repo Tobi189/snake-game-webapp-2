@@ -7,11 +7,11 @@ app.secret_key = 'dev_secret_key'  # Change this to something secure
 
 # === PostgreSQL connection ===
 conn = psycopg2.connect(
-    dbname='snakegame',
-    user='postgres',
-    password='nia12345',
-    host='host.docker.internal',
-    port='5432'
+    dbname=os.environ.get('DB_NAME', 'snakegame'),
+    user=os.environ.get('DB_USER', 'postgres'),
+    password=os.environ.get('DB_PASSWORD', 'postgres'),
+    host=os.environ.get('DB_HOST', 'localhost'),
+    port=os.environ.get('DB_PORT', '5432')
 )
 cur = conn.cursor()
 
