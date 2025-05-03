@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, session, url_for
 from werkzeug.security import generate_password_hash, check_password_hash
 import psycopg2
+import os
 
 app = Flask(__name__)
 app.secret_key = 'dev_secret_key'  # Change this to something secure
