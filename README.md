@@ -18,8 +18,8 @@ This is a local, single-player snake game built using Flask, JavaScript, and Pos
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/snake-game-webapp.git
-cd snake-game-webapp
+git clone git@github.com:Tobi189/snake-game-webapp-2.git
+cd snake-game-webapp-2
 ```
 
 2. Run the app using Docker Compose:
