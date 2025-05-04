@@ -52,20 +52,27 @@ def signup():
         if password != confirm:
             return render_template('signup.html', message="Passwords do not match")
 
-        cur.execute("SELECT id FROM users WHERE username = %s", (username,))
-        if cur.fetchone():
-            return render_template('signup.html', message="Username already taken")
+        try:
+            cur.execute("SELECT id FROM users WHERE username = %s", (username,))
+            if cur.fetchone():
+                return render_template('signup.html', message="Username already taken")
 
-        password_hash = generate_password_hash(password)
-        cur.execute("INSERT INTO users (username, password_hash) VALUES (%s, %s) RETURNING id", (username, password_hash))
-        user_id = cur.fetchone()[0]
-        conn.commit()
+            password_hash = generate_password_hash(password)
+            cur.execute(
+                "INSERT INTO users (username, password_hash) VALUES (%s, %s) RETURNING id",
+                (username, password_hash)
+            )
+            user_id = cur.fetchone()[0]
+            conn.commit()
+            return redirect(url_for('login'))
 
-   
-
-        return redirect(url_for('login'))
+        except Exception as e:
+            conn.rollback()
+            print(f"[ERROR] Signup failed: {e}")
+            return render_template('signup.html', message="An error occurred. Please try again.")
 
     return render_template('signup.html')
+
 
 @app.route('/game')
 def game():
@@ -98,21 +105,26 @@ def change_password():
         if new != confirm:
             return render_template('change_password.html', message="New passwords do not match")
 
-        # Verify current password
-        cur.execute("SELECT password_hash FROM users WHERE id = %s", (session['user_id'],))
-        user = cur.fetchone()
+        try:
+            cur.execute("SELECT password_hash FROM users WHERE id = %s", (session['user_id'],))
+            user = cur.fetchone()
 
-        if not user or not check_password_hash(user[0], current):
-            return render_template('change_password.html', message="Current password is incorrect")
+            if not user or not check_password_hash(user[0], current):
+                return render_template('change_password.html', message="Current password is incorrect")
 
-        # Update password
-        new_hash = generate_password_hash(new)
-        cur.execute("UPDATE users SET password_hash = %s WHERE id = %s", (new_hash, session['user_id']))
-        conn.commit()
+            new_hash = generate_password_hash(new)
+            cur.execute("UPDATE users SET password_hash = %s WHERE id = %s", (new_hash, session['user_id']))
+            conn.commit()
 
-        return render_template('change_password.html', message="Password updated successfully ✅")
+            return render_template('change_password.html', message="Password updated successfully ✅")
+
+        except Exception as e:
+            conn.rollback()
+            print(f"[ERROR] Change password failed: {e}")
+            return render_template('change_password.html', message="An error occurred.")
 
     return render_template('change_password.html')
+
 
 @app.route('/delete-account', methods=['POST'])
 def delete_account():
@@ -125,21 +137,25 @@ def delete_account():
     if not password:
         return jsonify({'success': False, 'message': 'Password required'}), 400
 
-    user_id = session['user_id']
+    try:
+        user_id = session['user_id']
+        cur.execute("SELECT password_hash FROM users WHERE id = %s", (user_id,))
+        user = cur.fetchone()
 
-    # Check password before deletion
-    cur.execute("SELECT password_hash FROM users WHERE id = %s", (user_id,))
-    user = cur.fetchone()
+        if not user or not check_password_hash(user[0], password):
+            return jsonify({'success': False, 'message': 'Incorrect password'}), 403
 
-    if not user or not check_password_hash(user[0], password):
-        return jsonify({'success': False, 'message': 'Incorrect password'}), 403
+        cur.execute("DELETE FROM users WHERE id = %s", (user_id,))
+        conn.commit()
+        session.clear()
 
-    # Delete user and cascade
-    cur.execute("DELETE FROM users WHERE id = %s", (user_id,))
-    conn.commit()
+        return jsonify({'success': True})
 
-    session.clear()
-    return jsonify({'success': True})
+    except Exception as e:
+        conn.rollback()
+        print(f"[ERROR] Delete account failed: {e}")
+        return jsonify({'success': False, 'message': 'An error occurred'}), 500
+
 
 
 from flask import jsonify
@@ -154,9 +170,8 @@ def submit_score():
     score = data.get('score')
     user_id = session['user_id']
 
-    # If score is not valid or is just for loading leaderboard (e.g. score = 0)
     if not isinstance(score, int) or score <= 0:
-        # Just return the leaderboard
+        # Return leaderboard and high score
         cur.execute("""
             SELECT u.username, s.score
             FROM scores s
@@ -167,45 +182,54 @@ def submit_score():
         top_scores = cur.fetchall()
         leaderboard = [{'username': row[0], 'score': row[1]} for row in top_scores]
 
-        # Return current high_score as well
         cur.execute("SELECT MAX(score) FROM scores WHERE user_id = %s", (user_id,))
         high_score = cur.fetchone()[0] or 0
-
 
         return jsonify({
             'high_score': high_score,
             'leaderboard': leaderboard
         })
 
+    try:
+        from datetime import datetime
+        cur.execute("""
+            INSERT INTO scores (user_id, score, played_at)
+            VALUES (%s, %s, %s)
+        """, (user_id, score, datetime.now()))
+        conn.commit()
 
-    # If this is a real game score
-    from datetime import datetime
-    cur.execute("""
-        INSERT INTO scores (user_id, score, played_at)
-        VALUES (%s, %s, %s)
-    """, (user_id, score, datetime.now()))
-    conn.commit()
+        # Return updated leaderboard
+        cur.execute("SELECT MAX(score) FROM scores WHERE user_id = %s", (user_id,))
+        current_high = cur.fetchone()[0] or 0
 
-    # Update high score if needed
-    cur.execute("SELECT MAX(score) FROM scores WHERE user_id = %s", (user_id,))
-    current_high = cur.fetchone()[0] or 0
+        cur.execute("""
+            SELECT u.username, s.score
+            FROM scores s
+            JOIN users u ON s.user_id = u.id
+            ORDER BY s.score DESC
+            LIMIT 5
+        """)
+        top_scores = cur.fetchall()
+        leaderboard = [{'username': row[0], 'score': row[1]} for row in top_scores]
 
-    # Return updated leaderboard
-    cur.execute("""
-        SELECT u.username, s.score
-        FROM scores s
-        JOIN users u ON s.user_id = u.id
-        ORDER BY s.score DESC
-        LIMIT 5
-    """)
-    top_scores = cur.fetchall()
-    leaderboard = [{'username': row[0], 'score': row[1]} for row in top_scores]
+        return jsonify({
+            'high_score': current_high,
+            'leaderboard': leaderboard
+        })
 
-    return jsonify({
-        'high_score': current_high,
-        'leaderboard': leaderboard
-    })
+    except Exception as e:
+        conn.rollback()
+        print(f"[ERROR] Submit score failed: {e}")
+        return jsonify({'error': 'Failed to submit score'}), 500
 
+
+
+import atexit
+
+@atexit.register
+def close_db():
+    cur.close()
+    conn.close()
 
 
 # === Run ===
