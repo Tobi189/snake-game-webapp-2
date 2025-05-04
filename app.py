@@ -51,6 +51,12 @@ def signup():
 
         if password != confirm:
             return render_template('signup.html', message="Passwords do not match")
+        
+        # Enforce basic password strength
+        if len(password) < 8:
+            return render_template('signup.html', message="Password must be at least 8 characters long")
+        if password.isalpha() or password.isdigit():
+            return render_template('signup.html', message="Password must contain both letters and numbers")
 
         try:
             cur.execute("SELECT id FROM users WHERE username = %s", (username,))
