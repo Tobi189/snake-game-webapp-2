@@ -1,6 +1,6 @@
 # 🐍 Snake Game Web Application
 
-**Author**: [Your Name]  
+**Author**: Liang Yue
 **Course**: CS250 – Final Project  
 **GitHub**: https://github.com/Tobi189/snake-game-webapp-2
 
@@ -46,7 +46,9 @@ cd snake-game-webapp-2
 
 ### 2. Start the App
 ```bash
-docker-compose up --build
+docker-compose up -d db
+sleep 5
+docker-compose up web
 ```
 
 ### 3. Open the Game
