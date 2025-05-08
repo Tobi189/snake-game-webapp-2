@@ -1,55 +1,69 @@
 # 🐍 Snake Game Web Application
 
-This is a local, single-player snake game built using Flask, JavaScript, and PostgreSQL. It runs entirely on your machine using Docker and Docker Compose.
+**Author**: [Your Name]  
+**Course**: CS250 – Final Project  
+**GitHub**: https://github.com/Tobi189/snake-game-webapp-2
 
 ---
 
-## 🐳 Run the Project (Docker Required)
+## 📘 Project Description
 
-### 🔧 Requirements
-
-- [Docker](https://www.docker.com/)
-- [Docker Compose](https://docs.docker.com/compose/)
+The Snake Game Web Application is a modern web-based version of the classic Snake game. Users can create accounts, play the game within a fixed grid, customize settings, and track their scores across sessions. Personal bests and a global leaderboard are automatically maintained through a PostgreSQL database. The project is fully containerized using Docker for local deployment.
 
 ---
 
-### ▶️ Start the App
+## 🎮 Features
 
-1. Clone the repository:
+- **User Authentication**: Sign up, log in, change password, and delete account
+- **Game Logic**: Play the snake game with grid collision, food consumption, and growing tail
+- **Score System**: Earn points based on speed; submit scores automatically
+- **Global Leaderboard**: Top 5 scores across all users shown in-game
+- **Customization Options**:
+  - Game speed (Fast, Normal, Slow)
+  - Grid size (Small, Medium, Large)
+  - Snake color and food appearance
+- **Pause & Resume**: Pause the game at any time
+- **Responsive UI**: Sidebar for user info, settings panel, and overlays
 
+---
+
+## 🧱 Tech Stack
+
+- **Frontend**: HTML5, CSS, JavaScript (Canvas-based)
+- **Backend**: Python, Flask
+- **Database**: PostgreSQL
+- **Tools**: Docker, Docker Compose, psycopg2, Jinja2
+
+---
+
+## 🐳 How to Run the App (Docker Required)
+
+### 1. Clone the Repository
 ```bash
-git clone git@github.com:Tobi189/snake-game-webapp-2.git
+git clone https://github.com/Tobi189/snake-game-webapp-2.git
 cd snake-game-webapp-2
 ```
 
-2. Run the app using Docker Compose:
-
+### 2. Start the App
 ```bash
 docker-compose up --build
 ```
 
-3. Open your browser and visit:
-
-```
-http://127.0.0.1:5000
-```
+### 3. Open the Game
+Visit: [http://localhost:5000](http://localhost:5000)
 
 ---
 
-## 🗃️ Database Setup
+## 🗃️ Database Tables
 
-The PostgreSQL database is initialized automatically using the `init_db.sql` file via Docker Compose.
-
-### Tables:
-
-#### `users`
-- `id` (SERIAL, primary key)
+### `users`
+- `id` (SERIAL, PK)
 - `username` (TEXT, unique)
 - `password_hash` (TEXT)
 
-#### `scores`
-- `id` (SERIAL, primary key)
-- `user_id` (INTEGER, foreign key → users)
+### `scores`
+- `id` (SERIAL, PK)
+- `user_id` (INTEGER, FK → users)
 - `score` (INTEGER)
 - `played_at` (TIMESTAMP)
 
@@ -57,12 +71,12 @@ The PostgreSQL database is initialized automatically using the `init_db.sql` fil
 
 ## 🧠 Notes
 
-- This is a local application. No external hosting or deployment is required.
-- All functionality (authentication, gameplay, scoring) is handled within Docker containers.
-- No manual database setup is needed — it is provisioned automatically.
+- No external deployment — runs fully locally
+- All data is saved via Docker volumes
+- The database is initialized automatically using `init_db.sql`
 
 ---
 
 ## 📄 License
 
-This project is for academic use only.
+This project is built for academic use in CS250.
