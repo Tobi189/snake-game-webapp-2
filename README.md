@@ -1,7 +1,6 @@
 # 🐍 Snake Game Web Application
 
 **Author**: Liang Yue
-
 **Course**: CS250 – Final Project  
 **GitHub**: https://github.com/Tobi189/snake-game-webapp-2
 
