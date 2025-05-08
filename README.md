@@ -45,18 +45,8 @@ cd snake-game-webapp-2
 ```
 
 ### 2. Start the App
-If you're on **Windows**, run:
-```cmd
-docker-compose up -d db
-timeout /t 5
-docker-compose up web
-```
-
-If you're on **macOS/Linux**, run:
 ```bash
-docker-compose up -d db
-sleep 5
-docker-compose up web
+docker-compose up --build
 ```
 
 ### 3. Open the Game
