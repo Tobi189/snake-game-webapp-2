@@ -49,6 +49,22 @@ cd snake-game-webapp-2
 docker-compose up --build
 ```
 
+> ⚠️ If you encounter a database connection error, you can try starting the database container first:
+
+#### On Windows:
+```cmd
+docker-compose up -d db
+timeout /t 5
+docker-compose up web
+```
+
+#### On macOS/Linux:
+```bash
+docker-compose up -d db
+sleep 5
+docker-compose up web
+```
+
 ### 3. Open the Game
 Visit: [http://localhost:5000](http://localhost:5000)
 
