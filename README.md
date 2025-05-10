@@ -55,6 +55,8 @@ docker-compose up --build
 ```cmd
 docker-compose up -d db
 timeout /t 5
+```
+```cmd
 docker-compose up web
 ```
 
